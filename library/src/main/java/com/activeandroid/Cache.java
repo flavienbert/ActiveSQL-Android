@@ -56,11 +56,18 @@ public final class Cache {
 	// PUBLIC METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	public static synchronized void initialize(Configuration configuration) {
-		if (sIsInitialized) {
-			Log.v("ActiveAndroid already initialized.");
-			return;
-		}
+    public static synchronized void initialize(Configuration configuration) {
+        /**
+         * Since gradle plugin 2.0.0 and above, for some reason, initialize method get called from
+         * ContentProvider class (with no models in the configuration) before being initialized from
+         * the App context (with the modelsInfo). An extra check on the tableInfos collection size
+         * was necessary to make sure we have the models tables initialized.
+         * @author Maher Hanafi (mhanafi@ebates.com)
+         */
+        if (sIsInitialized && sModelInfo.getTableInfos().size() > 0) {
+            Log.v("ActiveAndroid already initialized and tables.");
+            return;
+        }
 
 		sContext = configuration.getContext();
 		sModelInfo = new ModelInfo(configuration);
